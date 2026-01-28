@@ -17,6 +17,7 @@ Table eventlog_create(int);
 int eventlog_insert(Event, const Table*);
 int eventlog_find(int, int*, const Table*);
 int eventlog_deleteById(int, Table*);
+int eventlog_destroy(Table*);
 void eventlog_printAll(const Table*);
 
 

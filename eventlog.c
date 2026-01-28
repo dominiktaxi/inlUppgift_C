@@ -66,6 +66,26 @@ int eventlog_deleteById(int id, Table* table)
     return 0;
 }
 
+int eventlog_destroy(Table* table)
+{
+    
+    for(int i = 0; i < table->size; i++)
+    {
+        Bucket* temp = *(table->buckets + i);
+        if(temp != NULL)
+        {
+            Bucket** control = table->buckets + i;
+            while(temp != NULL)
+            {
+                *control = (*control)->next;
+                free(temp);
+                temp = *control;
+            }
+        }
+    }
+    table->size = 0;
+}
+
 void eventlog_printAll(const Table* table)
 {
    for(int i = 0; i < table->size; i++)
@@ -75,7 +95,7 @@ void eventlog_printAll(const Table* table)
             Bucket* temp = *(table->buckets + i);
             while(temp != NULL)
             {
-                printf("ID: %d  Value: %d\n", temp->event.sensorId, temp->event.value);
+                printf("ID: %d  Value: %d  Timestamp: %d\n", temp->event.sensorId, temp->event.value, temp->event.timeStamp);
                 temp = temp->next;
             }
         }

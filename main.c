@@ -4,16 +4,31 @@ int main()
 {
     Table table;
     table = eventlog_create(10);
-    eventlog_insert(3, 180, &table);
-    eventlog_insert(3, 180, &table);
-    eventlog_insert(4, 180, &table);
-    eventlog_insert(5, 180, &table);
-    eventlog_insert(9, 180, &table);
-    eventlog_insert(3, 180, &table);
-    eventlog_insert(3, 180, &table);
-    eventlog_insert(3, 180, &table);
     
-    eventlog_deleteById(3, &table);
+    Event events[100];
+    for(int i = 0; i < 100; i++)
+    {
+        events[i].sensorId = i % 10;
+        events[i].timeStamp = i;
+        events[i].value = i * 2;
+    }
+
+    for(int i = 0; i < 100; i++)
+    {
+        eventlog_insert(events[i], &table);
+    }
+
+    
+    //eventlog_deleteById(3, &table);
+    //eventlog_destroy(&table);
+    eventlog_printAll(&table);
+    eventlog_destroy(&table);
+    printf("dude");
+    table = eventlog_create(10);
+   for(int i = 0; i < 100; i++)
+    {
+        eventlog_insert(events[i], &table);
+    }
     eventlog_printAll(&table);
     return 0;
 }
