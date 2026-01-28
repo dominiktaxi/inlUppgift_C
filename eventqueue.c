@@ -1,7 +1,7 @@
 #include "eventqueue.h"
 #include <assert.h>
 
-EventLog* eventlog_create(int capacity)
+EventLog* eventqueue_create(int capacity)
 {
     if(capacity <= 0) return NULL;
     EventLog* new = malloc(sizeof(EventLog));
@@ -12,7 +12,7 @@ EventLog* eventlog_create(int capacity)
     return new;
 }
 
-int eventlog_enqueue(EventLog* log, Event event)
+int eventqueue_enqueue(EventLog* log, Event event)
 {
     Node* new = malloc(sizeof(Node));
     if(new == NULL) return 0;
@@ -34,7 +34,7 @@ int eventlog_enqueue(EventLog* log, Event event)
     }
 }
 
-Event eventlog_dequeue(EventLog* log)
+Event eventqueue_dequeue(EventLog* log)
 {
     assert(log != NULL);
     assert(log->size > 0);
@@ -59,7 +59,7 @@ Event eventlog_dequeue(EventLog* log)
     }
 }
 
-void eventlog_clear(EventLog* log)
+void eventqueue_clear(EventLog* log)
 {
     assert(log != NULL);
     Node* temp = log->head;
@@ -75,7 +75,7 @@ void eventlog_clear(EventLog* log)
 }
 
 //CALLER MUST SET POINTER TO NULL
-void eventlog_destroy(EventLog* log)
+void eventqueue_destroy(EventLog* log)
 {
     assert(log != NULL);
     Node* temp = log->head;
@@ -88,7 +88,7 @@ void eventlog_destroy(EventLog* log)
     free(log);
 }
 
-int eventlog_size(const EventLog* log)
+int eventqueue_size(const EventLog* log)
 {
     return log->size;
 }
