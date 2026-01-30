@@ -1,94 +1,61 @@
 #include "eventqueue.h"
 #include <assert.h>
 
-EventLog* eventqueue_create(int capacity)
+EventQueue eventqueue_create(int capacity)
 {
-    if(capacity <= 0) return NULL;
-    EventLog* new = malloc(sizeof(EventLog));
-    new->head = NULL;
-    new->tail = NULL;
-    new->capacity = capacity;
-    new->size = 0;
+    EventQueue new;
+    new.size = capacity;
+    new.events = malloc(sizeof(Event) * capacity);
+    new.front = 0;
     return new;
 }
 
-int eventqueue_enqueue(EventLog* log, Event event)
+void eventqueue_destroy(EventQueue* q)
 {
-    Node* new = malloc(sizeof(Node));
-    if(new == NULL) return 0;
-
-    new->event = event;
-    if(log->size < log->capacity)
-    {
-        if(log->tail == NULL)
-        {
-            log->tail = new;
-            log->head = new;
-            log->tail->next = NULL;
-        }
-        else
-        {
-            log->tail->next = new;
-            log->tail = new;
-        }
-    }
+    assert(!eventQueue_isEmpty(q));
+    free(q->events);
+    q->events = NULL;
+    q->size = 0;
+    q->front = 0;
+    q->amountOfEvents = 0;
+    assert(q->events == NULL);
 }
 
-Event eventqueue_dequeue(EventLog* log)
+int eventqueue_isEmpty(const EventQueue* q)
 {
-    assert(log != NULL);
-    assert(log->size > 0);
-    if(log->tail == log->head)
-    {
-        assert(log->size == 1);
-        Event event = log->head->event;
-        free(log->head);
-        log->head = NULL;
-        log->tail = NULL;
-        log->size--;
-        return event;
-    }
-    else
-    {
-        Event event = log->head->event;
-        Node* temp = log->head;
-        log->head = log->head->next;
-        free(temp);
-        log->size--;
-        return event;
-    }
+    return q->front == 0;
 }
 
-void eventqueue_clear(EventLog* log)
+int eventqueue_isFull(const EventQueue* q)
 {
-    assert(log != NULL);
-    Node* temp = log->head;
-    while(log->head != NULL)
-    {
-        log->head = log->head->next;
-        free(temp);
-        temp = log->head;
-    }
-    log->tail = NULL;
-    log->size = 0;
-    assert(log->tail == NULL && log->head == NULL);
+    return q->front == 8;
 }
 
-//CALLER MUST SET POINTER TO NULL
-void eventqueue_destroy(EventLog* log)
+//ingen assert q != NULL för att Eventq skapas på stacken per definition
+int eventqueue_enqueue(EventQueue* q, Event event)
 {
-    assert(log != NULL);
-    Node* temp = log->head;
-    while(log->head != NULL)
-    {
-        log->head = log->head->next;
-        free(temp);
-        temp = log->head;
-    }
-    free(log);
+    assert(!eventq_isFull(q));
+    int index = (q->front + q->amountOfEvents) % q->size;
+    *(q->events + index) = event;
+    q->amountOfEvents++;
+}
+    
+int eventqueue_dequeue(EventQueue* q, Event* eventOut)
+{
+   if(eventqueue_isEmpty(q)) { return 0; }
+   int index = q->front;
+   q->front = (q->front + 1) % q->size;
+   q->amountOfEvents--;
+   eventOut = (q->events + index);
 }
 
-int eventqueue_size(const EventLog* log)
+void eventqueue_clear(EventQueue* q)
 {
-    return log->size;
+    q->amountOfEvents = 0;
+    q->front = 0;
+}
+
+int eventqueue_size(const EventQueue* q)
+{
+    return q->size;
 }

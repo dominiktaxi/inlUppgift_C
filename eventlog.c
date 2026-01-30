@@ -5,41 +5,83 @@
 
 
 
-Table eventlog_create(int size)
+EventList* eventlog_create()
 {
-    Bucket** new = malloc(sizeof(Bucket*) * size);
-    assert(new != NULL);
-    for(int i = 0; i < size; i++)
-    {
-        *(new + i) = NULL;
-    }
-    Table table;
-    table.size = size;
-    table.buckets = new;
-    return table;
+    EventList* new = malloc(sizeof(EventList));
+    new->head = NULL;
+    new->tail = NULL;
+    return new;
 }
 
-int eventlog_insert(Event event, const Table* table)
+void eventlog_destroy(EventList* list)
 {
-    int id = event.sensorId;
-    assert(id < table->size);
-    Bucket* new = malloc(sizeof(Bucket));
-    assert(new != NULL);
-    new->event = event;
-    new->next = NULL;
-
-    if(*(table->buckets + id) == NULL)
+    assert(list != NULL);
+    Node* temp = list->head;
+    Node* next = NULL;
+    while(temp != NULL)
     {
-        *(table->buckets + id) = new;
-        return 1;
+        next = temp->next;
+        free(temp);
+        temp = next;
     }
+    list->head = NULL;
+    list->tail = NULL;
+    list->size = 0;
+}
 
-    Bucket* temp = *(table->buckets + id);
-    while(temp->next != NULL)
+int eventlog_size(const EventList* list)
+{
+    return list->size;
+}
+
+
+void eventlog_append(EventList* list, Event event)
+{
+    assert(list != NULL);
+    if(list->head == NULL)
+    {
+        list->head = malloc(sizeof(Node));
+        assert(list->head != NULL);
+        list->tail = list->head;
+        list->head->event = event;
+        list->head->next = NULL;
+    }
+    else
+    {
+        list->tail->next = malloc(sizeof(Node));
+        assert(list->tail->next != NULL);
+        list->tail->next->event = event;
+        list->tail = list->tail->next;
+        list->tail->next = NULL;
+    }
+    list->size++;
+}
+
+Event eventlog_getEvent(const EventList* list, int index)
+{
+    assert (list != NULL);
+    assert (index < list->size && index >= 0);
+    Node* temp = list->head;
+    for(int i = 0; i < index; i++)
     {
         temp = temp->next;
     }
-    temp->next = new;
+    assert(temp != NULL);
+    return temp->event;
+}
+
+void eventlog_set(EventList* list, int index, Event event)
+{
+    assert(list != NULL);
+    assert(index < list->size && index >= 0);
+    Node* temp = list->head;
+
+    for(int i = 0; i < index; i++)
+    {
+        temp = temp->next;
+    }
+    assert(temp != NULL);
+    temp->event = event;
 }
 
 int eventlog_find(int key, int* outValue, const Table* table)
@@ -47,57 +89,10 @@ int eventlog_find(int key, int* outValue, const Table* table)
     return 0;
 }
 
-int eventlog_deleteById(int id, Table* table)
-{
-    assert(id < table->size);
-    Bucket* temp = *(table->buckets + id);
-    if(temp != NULL)
-    {
-        Bucket** control = table->buckets + id;
-        while(temp != NULL)
-        {
-            *control = (*control)->next;
-            free(temp);
-            temp = *control;
-        }
-        return 1;
-    }
-    assert(*(table->buckets + id) == NULL);
-    return 0;
-}
 
-int eventlog_destroy(Table* table)
-{
-    
-    for(int i = 0; i < table->size; i++)
-    {
-        Bucket* temp = *(table->buckets + i);
-        if(temp != NULL)
-        {
-            Bucket** control = table->buckets + i;
-            while(temp != NULL)
-            {
-                *control = (*control)->next;
-                free(temp);
-                temp = *control;
-            }
-        }
-    }
-    table->size = 0;
-}
+
 
 void eventlog_printAll(const Table* table)
 {
-   for(int i = 0; i < table->size; i++)
-   {
-        if(*(table->buckets + i) != NULL)
-        {
-            Bucket* temp = *(table->buckets + i);
-            while(temp != NULL)
-            {
-                printf("ID: %d  Value: %d  Timestamp: %d\n", temp->event.sensorId, temp->event.value, temp->event.timeStamp);
-                temp = temp->next;
-            }
-        }
-   }
+   
 }

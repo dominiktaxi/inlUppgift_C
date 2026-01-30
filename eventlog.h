@@ -1,23 +1,29 @@
 #ifndef EVENTLOG_H
 #define EVENTLOG_H
 #include "event.h"
-typedef struct Bucket
+typedef struct Node
 {
     Event event;
-    struct Bucket* next;
-} Bucket;
+    struct Node* next;
+} Node;
 
-typedef struct Table
+typedef struct EventList
 {
+    Node* head;
+    Node* tail;
     int size;
-    Bucket** buckets;
-}Table;
+}EventList;
 
-Table eventlog_create(int);
-int eventlog_insert(Event, const Table*);
-int eventlog_find(int, int*, const Table*);
-int eventlog_deleteById(int, Table*);
-int eventlog_destroy(Table*);
+
+
+EventList* eventlog_create();
+void eventlog_destroy(EventList*);
+int eventlog_size(const EventList*);
+void eventlog_append(EventList*, Event);
+Event eventlog_getEvent(const EventList*, int index);
+void eventlog_set(EventList*, int, Event);
+
+
 void eventlog_printAll(const Table*);
 
 

@@ -9,7 +9,7 @@ typedef struct Event
     enum TYPE  
     {
         TEMP,
-        BUTTON,
+        HUMIDITY,
         MOTION
     }type;
 }Event;
